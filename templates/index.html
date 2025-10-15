@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Clone</title>
+    <!-- 1. Add the marked.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; }
+        #chatbox { border: 1px solid #ccc; padding: 10px; height: 500px; overflow-y: scroll; background-color: #fff; border-radius: 5px; margin-bottom: 10px; }
+        .message { margin-bottom: 15px; }
+        .user-message { text-align: right; color: #333; }
+        .bot-message { text-align: left; color: #0056b3; }
+        /* Basic styling for formatted bot responses */
+        .bot-message h1, .bot-message h2, .bot-message h3 { margin-top: 0.5em; margin-bottom: 0.5em; }
+        .bot-message ul, .bot-message ol { padding-left: 20px; }
+        .bot-message code { background-color: #eee; padding: 2px 4px; border-radius: 3px; }
+        .bot-message pre { background-color: #eee; padding: 10px; border-radius: 5px; }
+        #userInput { width: calc(100% - 80px); padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>DeepSeek Chat</h1>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type your message here..." onkeydown="handleKey(event)">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        function handleKey(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const messageText = userInput.value.trim();
+            if (!messageText) return;
+
+            const chatbox = document.getElementById('chatbox');
+
+            // Display user's message
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.textContent = messageText;
+            chatbox.appendChild(userMessageDiv);
+
+            // Clear input and scroll down
+            userInput.value = '';
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            try {
+                // Get bot's response
+                const response = await fetch(`/get?msg=${encodeURIComponent(messageText)}`);
+                const botResponseText = await response.text();
+
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'message bot-message';
+
+                // 2. Use marked.parse() to convert Markdown to HTML
+                botMessageDiv.innerHTML = marked.parse(botResponseText);
+
+                chatbox.appendChild(botMessageDiv);
+            } catch (error) {
+                console.error("Error fetching bot response:", error);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'message bot-message';
+                errorDiv.style.color = 'red';
+                errorDiv.textContent = 'Sorry, an error occurred while getting a response.';
+                chatbox.appendChild(errorDiv);
+            }
+
+            // Scroll to the latest message
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
