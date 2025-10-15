@@ -2,7 +2,7 @@
 .env
 
 # Python virtual environment
-.gpt/
+.venv/
 
 # Python cache
 __pycache__/
